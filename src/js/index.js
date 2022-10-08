@@ -1,6 +1,18 @@
 const $ = (selector) => document.querySelector(selector);
 
 function App() {
+  // prompt 인터페이스 이용해 메뉴 수정하기
+  $("#espresso-menu-list").addEventListener("click", (e) => {
+    if (e.target.classList.contains("menu-edit-button")) {
+      const $menuName = e.target.closest("li").querySelector(".menu-name");
+      const updatedMenuName = prompt(
+        "수정할 메뉴명을 입력해주세요: ",
+        $menuName.innerText
+      );
+      $menuName.innerText = updatedMenuName;
+    }
+  });
+
   // form 태그가 자동으로 서버에 데이터 전송하는 것을 막아준다
   $("#espresso-menu-form").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -17,7 +29,7 @@ function App() {
     // 추가할 새로운 메뉴의 template 생성 함수
     const menuItemTemplate = (espressoMenuName) => {
       return `<li class="menu-list-item d-flex items-center py-2">
-        <span class="w-100 pl-2 menu-naㄴme">${espressoMenuName}</span>
+        <span class="w-100 pl-2 menu-name">${espressoMenuName}</span>
         <button
           type="button"
           class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
