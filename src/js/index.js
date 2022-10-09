@@ -1,22 +1,10 @@
 const $ = (selector) => document.querySelector(selector);
 
 function App() {
-  // prompt 인터페이스 이용해 메뉴 수정하기
-  $("#espresso-menu-list").addEventListener("click", (e) => {
-    if (e.target.classList.contains("menu-edit-button")) {
-      const $menuName = e.target.closest("li").querySelector(".menu-name");
-      const updatedMenuName = prompt(
-        "수정할 메뉴명을 입력해주세요: ",
-        $menuName.innerText
-      );
-      $menuName.innerText = updatedMenuName;
-    }
-  });
-
-  // form 태그가 자동으로 서버에 데이터 전송하는 것을 막아준다
-  $("#espresso-menu-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
+  const updateMenuCount = () => {
+    const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
+    $(".menu-count").innerText = `총 ${menuCount}개`;
+  };
 
   const addMenuName = () => {
     const espressoMenuName = $("#espresso-menu-name").value;
@@ -54,16 +42,44 @@ function App() {
     );
 
     // menu-list 내 li item의 총 개수
-    const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
-    $(".menu-count").innerText = `총 ${menuCount}개`;
+    updateMenuCount();
 
     // 메뉴 추가 후 input값은 빈 값으로 초기화
     $("#espresso-menu-name").value = "";
   };
 
-  $("#espresso-menu-submit-button").addEventListener("click", () => {
-    addMenuName();
+  const updateMenuName = (e) => {
+    const $menuName = e.target.closest("li").querySelector(".menu-name");
+    const updatedMenuName = prompt(
+      "수정할 메뉴명을 입력해주세요: ",
+      $menuName.innerText
+    );
+    $menuName.innerText = updatedMenuName;
+  };
+
+  const removeMenuName = (e) => {
+    if (confirm("정말 삭제하시겠습니까?")) {
+      e.target.closest("li").remove();
+      updateMenuCount();
+    }
+  };
+
+  // form 태그가 자동으로 서버에 데이터 전송하는 것을 막아준다
+  $("#espresso-menu-form").addEventListener("submit", (e) => {
+    e.preventDefault();
   });
+
+  // prompt 인터페이스 이용해 메뉴 수정 & 삭제하기
+  $("#espresso-menu-list").addEventListener("click", (e) => {
+    if (e.target.classList.contains("menu-edit-button")) {
+      updateMenuName(e);
+    }
+    if (e.target.classList.contains("menu-remove-button")) {
+      removeMenuName(e);
+    }
+  });
+
+  $("#espresso-menu-submit-button").addEventListener("click", addMenuName);
 
   $("#espresso-menu-name").addEventListener("keypress", (e) => {
     if (e.key !== "Enter") {
