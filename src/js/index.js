@@ -10,20 +10,28 @@ const store = {
 };
 
 function App() {
-  this.menu = []; // 메뉴이름 -> 상태를 나타내는 변하는 데이터이므로 property로 지정
+  this.menu = {
+    espresso: [],
+    frappuccino: [],
+    blended: [],
+    teavana: [],
+    desert: [],
+  };
+
+  this.currentCategory = "espresso";
+
   this.init = () => {
-    if (store.getLocalStorage().length >= 1) {
+    if (store.getLocalStorage()) {
       this.menu = store.getLocalStorage();
     }
-
-    showMenuItems(); // menu Items 보여주기
+    showMenuItems();
   };
 
   const showMenuItems = () => {
-    const menuItemTemplate = this.menu
-      .map((item, index) => {
+    const menuItemTemplate = this.menu[this.currentCategory]
+      .map((menuItem, index) => {
         return `<li data-menu-id="${index}" class="menu-list-item d-flex items-center py-2">
-                <span class="w-100 pl-2 menu-name">${item.name}</span>
+                <span class="w-100 pl-2 menu-name">${menuItem.name}</span>
                 <button
                   type="button"
                   class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
@@ -40,30 +48,28 @@ function App() {
       })
       .join("");
 
-    $("#espresso-menu-list").innerHTML = menuItemTemplate;
+    $("#menu-list").innerHTML = menuItemTemplate;
 
     updateMenuCount();
   };
 
   const updateMenuCount = () => {
-    const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
+    const menuCount = $("#menu-list").querySelectorAll("li").length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
   };
 
   const addMenuName = () => {
-    const espressoMenuName = $("#espresso-menu-name").value;
+    const menuName = $("#menu-name").value;
 
-    if (espressoMenuName === "") {
+    if (menuName === "") {
       alert("값을 입력해주세요.");
       return;
     }
 
-    this.menu.push({ name: espressoMenuName }); // 객체 담아주기
+    this.menu[this.currentCategory].push({ name: menuName }); // 객체 담아주기
     store.setLocalStorage(this.menu); // localStorage에 추가한 객체 저장하기
-
     showMenuItems();
-
-    $("#espresso-menu-name").value = "";
+    $("#menu-name").value = "";
   };
 
   const updateMenuName = (e) => {
@@ -73,7 +79,7 @@ function App() {
       "수정할 메뉴명을 입력해주세요: ",
       $menuName.innerText
     );
-    this.menu[menuId].name = updatedMenuName; // HTML 내 보이는 this.menu의 name 수정
+    this.menu[this.currentCategory][menuId].name = updatedMenuName; // HTML 내 보이는 this.menu의 name 수정
     store.setLocalStorage(this.menu); // 새로 수정된 this.menu를 localSorage에 저장
     $menuName.innerText = updatedMenuName;
   };
@@ -81,18 +87,18 @@ function App() {
   const removeMenuName = (e) => {
     if (confirm("정말 삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
-      this.menu.splice(menuId, 1);
-      e.target.closest("li").remove();
+      this.menu[this.currentCategory].splice(menuId, 1);
       store.setLocalStorage(this.menu);
+      e.target.closest("li").remove();
       updateMenuCount();
     }
   };
 
-  $("#espresso-menu-form").addEventListener("submit", (e) => {
+  $("#menu-form").addEventListener("submit", (e) => {
     e.preventDefault();
   });
 
-  $("#espresso-menu-list").addEventListener("click", (e) => {
+  $("#menu-list").addEventListener("click", (e) => {
     if (e.target.classList.contains("menu-edit-button")) {
       updateMenuName(e);
     }
@@ -101,9 +107,9 @@ function App() {
     }
   });
 
-  $("#espresso-menu-submit-button").addEventListener("click", addMenuName);
+  $("#menu-submit-button").addEventListener("click", addMenuName);
 
-  $("#espresso-menu-name").addEventListener("keypress", (e) => {
+  $("#menu-name").addEventListener("keypress", (e) => {
     if (e.key !== "Enter") {
       return;
     }
@@ -114,7 +120,9 @@ function App() {
     const isCategoryButton = e.target.classList.contains("cafe-category-name");
     if (isCategoryButton) {
       const categoryName = e.target.dataset.categoryName;
-      console.log(categoryName);
+      this.currentCategory = categoryName;
+      $("#category-title").innerText = `${e.target.innerText} 메뉴 관리`;
+      showMenuItems();
     }
   });
 }
