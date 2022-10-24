@@ -1,6 +1,8 @@
 import { $ } from "./utils/dom.js";
 import { store } from "./store/index.js";
 
+const BASE_URL = "http://localhost:3000/api";
+
 function App() {
   this.menu = {
     espresso: [],
@@ -60,7 +62,7 @@ function App() {
     }개`;
   };
 
-  const addMenuName = () => {
+  const addMenuName = async () => {
     const menuName = $("#menu-name").value;
 
     if (menuName === "") {
@@ -68,10 +70,30 @@ function App() {
       return;
     }
 
-    this.menu[this.currentCategory].push({ name: menuName });
-    store.setLocalStorage(this.menu);
-    showMenuItems();
-    $("#menu-name").value = "";
+    await fetch(`${BASE_URL}/category/${this.currentCategory}/menu`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ name: menuName }),
+    }).then((response) => {
+      return response.json();
+    });
+
+    await fetch(`${BASE_URL}/category/${this.currentCategory}/menu`)
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.menu[this.currentCategory] = data;
+        showMenuItems();
+        $("#menu-name").value = "";
+      });
+    // this.menu[this.currentCategory].push({ name: menuName });
+    // store.setLocalStorage(this.menu);
+    // showMenuItems();
+    // $("#menu-name").value = "";
   };
 
   const updateMenuName = (e) => {
@@ -81,6 +103,10 @@ function App() {
       "수정할 메뉴명을 입력해주세요: ",
       $menuName.innerText
     );
+    if (updatedMenuName.length < 1) {
+      alert("1자 이상 입력해주세요.");
+      return;
+    }
     this.menu[this.currentCategory][menuId].name = updatedMenuName;
     store.setLocalStorage(this.menu);
     showMenuItems();
